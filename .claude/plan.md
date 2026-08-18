@@ -70,13 +70,14 @@ knowledge-pipeline/
 - **Checkpoint:** `python cli.py ingest --dry-run` prints normalized notes to stdout.
 
 ## Phase 2 — Extraction
-- [ ] `extract/schema.py`: pydantic `ExtractedNote` — `summary: str`, `action_items: list[str]`,
+- [x] `extract/schema.py`: pydantic `ExtractedNote` — `summary: str`, `action_items: list[str]`,
       `decisions: list[str]`, `topics: list[str]`, `participants: list[str]`
-- [ ] `extract/extractor.py`: prompt qwen2.5:7b with Ollama's JSON-mode/format=json, parse into
-      `ExtractedNote`, retry up to 2x on validation failure, log failures to `data/failures.jsonl`
-- [ ] Run over all ingested notes, save `ExtractedNote` objects alongside raw notes
-- **Checkpoint:** `python cli.py ingest` produces clean structured JSON for every sample note;
-      report failure rate in stdout.
+- [x] `extract/extractor.py`: prompt qwen2.5:7b via Ollama structured output (`format=<json schema>`),
+      parse into `ExtractedNote`, retry up to 2x on validation failure, log failures to `data/failures.jsonl`
+- [ ] Save `ExtractedNote` objects alongside raw notes (currently only printed to stdout — persistence
+      lands with Phase 3 storage)
+- [x] **Checkpoint:** `python cli.py ingest` produces clean structured JSON for every sample note;
+      report failure rate in stdout. Verified: 8/8 notes extracted, 0 failures, 1 attempt each.
 
 ## Phase 3 — Storage / RAG
 - [ ] `store/embeddings.py`: wrap embeddinggemma calls — MUST use the instruct-prefixed format

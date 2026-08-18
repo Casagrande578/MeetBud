@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 
+from extract.extractor import extract_notes
 from ingest.load_nodes import load_notes
 
 app = typer.Typer(add_completion=False)
@@ -31,8 +32,22 @@ def ingest(
         typer.echo(f"\n{len(notes)} notes loaded.")
         return
 
-    # Extraction (Phase 2) and storage (Phase 3) land here once those modules exist.
-    typer.echo(f"Loaded {len(notes)} notes. Extraction/storage not implemented yet.")
+    typer.echo(f"Loaded {len(notes)} notes. Extracting...")
+    results = extract_notes(notes)
+
+    failures = [r for r in results if not r.ok]
+    for r in results:
+        if r.ok:
+            typer.echo(f"[{r.note_id}] ok ({r.attempts} attempt(s))")
+            typer.echo(f"    {r.extracted.model_dump_json()}")
+        else:
+            typer.echo(f"[{r.note_id}] FAILED after {r.attempts} attempt(s): {r.error}")
+
+    # Storage (Phase 3) lands here once that module exists.
+    typer.echo(
+        f"\n{len(results) - len(failures)}/{len(results)} notes extracted successfully "
+        f"({len(failures)} failure(s)). Storage not implemented yet."
+    )
 
 
 @app.command()

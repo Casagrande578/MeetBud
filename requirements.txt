@@ -1,0 +1,5 @@
+ollama
+chromadb
+pydantic
+typer
+pytest
