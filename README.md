@@ -1,4 +1,4 @@
-##WIP: This project is a Work in Progress
+## WIP: This project is a Work in Progress
 The following is a plan of the scope of this project
 
 ***
