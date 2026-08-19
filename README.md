@@ -16,10 +16,10 @@ embeddinggemma
 
 ## Feature Plan:
 
-- Ingest data from .md or .txt files [x]
-- Extract data from files using open models (Qwen2.5:7b as an example) into JSON for storage []
-- Storage / RAG + Embeddings []
-- Orchestrator, agent to process queries []
-- Evals []
-- Whisper, audio ingestion + UI []
+- [x] Ingest data from .md or .txt files 
+- [x] Extract data from files using open models (Qwen2.5:7b as an example) into JSON for storage 
+- [ ] Storage / RAG + Embeddings 
+- [ ] Orchestrator, agent to process queries 
+- [ ] Evals 
+- [ ] Whisper, audio ingestion + UI 
 
