@@ -80,16 +80,20 @@ knowledge-pipeline/
       report failure rate in stdout. Verified: 8/8 notes extracted, 0 failures, 1 attempt each.
 
 ## Phase 3 — Storage / RAG
-- [ ] `store/embeddings.py`: wrap embeddinggemma calls — MUST use the instruct-prefixed format
-      (`"task: search result | query: ..."` style, per model card) for queries vs. documents;
-      write a 3-line sanity test comparing cosine similarity of a known matching pair vs. a
-      known non-matching pair before trusting the pipeline
-- [ ] `store/vector_store.py`: Chroma collection, `add(note_id, embedding, text, metadata)`,
-      `query(text, top_k, metadata_filter=None)`; metadata = `{date, participants, topics}`
-- [ ] Embed and store every extracted note (embed the `summary`, not raw transcript, for retrieval
-      quality; keep raw text retrievable by id for display)
-- **Checkpoint:** `python cli.py ask "<query>"` (semantic-search-only, no agent yet) returns
-      top-k relevant notes with similarity scores.
+- [x] `store/embeddings.py`: wrap embeddinggemma calls — instruct-prefixed format
+      (`"task: search result | query: ..."` for queries, `"title: ... | text: ..."` for documents,
+      per model card — confirmed Ollama ships no built-in template, so prefixing is on us);
+      `store/test_embeddings.py` sanity test comparing cosine similarity of a known matching pair
+      vs. a known non-matching pair — passing
+- [x] `store/vector_store.py`: Chroma `PersistentClient` collection (cosine space), `add_note(collection, note, extracted, embedding)`
+      (upsert, so re-ingest is safe), `query(collection, embedding, top_k)` returning `SearchResult` with similarity scores;
+      metadata = `{title, date, participants, topics}` (list fields joined as comma-separated strings — Chroma metadata values must be scalar)
+- [x] Embed and store every extracted note (embeds the `summary`, not raw transcript; raw text stays
+      retrievable via `Note.source_path`/`raw_text`, not yet persisted separately — fine since `data/samples/`
+      is the source of truth for now)
+- [x] **Checkpoint:** `python cli.py ask "<query>"` (semantic-search-only, no agent yet) returns
+      top-k relevant notes with similarity scores. Verified: pricing query ranked the two pricing
+      notes (0.61, 0.50 similarity) well above an unrelated hiring note (0.29).
 
 ## Phase 4 — Orchestrator / Agent
 - [ ] `agent/tools.py`: three plain Python functions —

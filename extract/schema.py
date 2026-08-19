@@ -1,5 +1,3 @@
-"""Pydantic schema for structured knowledge extracted from a meeting note."""
-
 from __future__ import annotations
 
 from pydantic import BaseModel, Field

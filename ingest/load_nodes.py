@@ -1,5 +1,3 @@
-"""Load meeting notes from data/samples into normalized Note objects."""
-
 from __future__ import annotations
 
 import re

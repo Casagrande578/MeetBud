@@ -1,11 +1,11 @@
-"""Single entrypoint: python cli.py ingest|ask|eval"""
-
 from __future__ import annotations
 
 import typer
 
 from extract.extractor import extract_notes
 from ingest.load_nodes import load_notes
+from store.embeddings import embed_documents, embed_query
+from store.vector_store import add_note, get_collection, query as query_store
 
 app = typer.Typer(add_completion=False)
 
@@ -36,6 +36,9 @@ def ingest(
     results = extract_notes(notes)
 
     failures = [r for r in results if not r.ok]
+    ok_notes = [note for note, r in zip(notes, results) if r.ok]
+    ok_results = [r for r in results if r.ok]
+
     for r in results:
         if r.ok:
             typer.echo(f"[{r.note_id}] ok ({r.attempts} attempt(s))")
@@ -43,18 +46,38 @@ def ingest(
         else:
             typer.echo(f"[{r.note_id}] FAILED after {r.attempts} attempt(s): {r.error}")
 
-    # Storage (Phase 3) lands here once that module exists.
+    if ok_results:
+        # embed the summary, not the raw transcript, for retrieval quality
+        embeddings = embed_documents(
+            [r.extracted.summary for r in ok_results], [note.title for note in ok_notes]
+        )
+        collection = get_collection()
+        for note, r, embedding in zip(ok_notes, ok_results, embeddings):
+            add_note(collection, note, r.extracted, embedding)
+
     typer.echo(
-        f"\n{len(results) - len(failures)}/{len(results)} notes extracted successfully "
-        f"({len(failures)} failure(s)). Storage not implemented yet."
+        f"\n{len(ok_results)}/{len(results)} notes extracted and stored "
+        f"({len(failures)} failure(s))."
     )
 
 
 @app.command()
-def ask(query: str) -> None:
-    """Answer a query by routing through the retrieval agent."""
-    typer.echo("ask is not implemented yet (Phase 3/4).")
-    raise typer.Exit(code=1)
+def ask(
+    query: str,
+    top_k: int = typer.Option(5, "--top-k", help="Number of results to return."),
+) -> None:
+    """Semantic search over stored notes. (Agent routing lands in Phase 4.)"""
+    collection = get_collection()
+    if collection.count() == 0:
+        typer.echo("No notes stored yet — run `python cli.py ingest` first.")
+        raise typer.Exit(code=1)
+
+    embedding = embed_query(query)
+    results = query_store(collection, embedding, top_k=top_k)
+
+    for r in results:
+        typer.echo(f"[{r.note_id}] {r.date or 'no-date'} — {r.title}  (similarity: {r.similarity:.3f})")
+        typer.echo(f"    {r.summary}")
 
 
 @app.command(name="eval")

@@ -22,4 +22,5 @@ embeddinggemma
 - [ ] Orchestrator, agent to process queries 
 - [ ] Evals 
 - [ ] Whisper, audio ingestion + UI 
-
+- [ ] Self organize data for human readablity
+- [ ] Connect with some notes app (Obsidian)

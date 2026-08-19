@@ -1,10 +1,3 @@
-"""Extract structured knowledge from a Note via a local Ollama model.
-
-Uses Ollama's structured-output mode (format=<json schema>) so the model is
-constrained to valid JSON, then validates the result against ExtractedNote.
-Failed attempts are retried and logged to data/failures.jsonl for inspection.
-"""
-
 from __future__ import annotations
 
 import json
